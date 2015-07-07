@@ -183,6 +183,7 @@
 (def aux-stream-id 2)
 
 (defn aeron-channel [addr port]
+  (taoensso.timbre/info "AERON CHANNEL: "  (format "udp://%s:%s" addr port))
   (format "udp://%s:%s" addr port))
 
 (defrecord AeronResources [conn accept-send-fut accept-aux-fut send-subscriber aux-subscriber])
