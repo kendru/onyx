@@ -199,7 +199,7 @@
         send-handler (fragment-data-handler 
                        (fn [buffer offset length header] 
                          (handle-sent-message inbound-ch decompress-f buffer offset length header)))
-        aux-handler (data-handler 
+        aux-handler (fragment-data-handler 
                       (fn [buffer offset length header] 
                         (handle-aux-message acking-daemon release-ch retry-ch buffer offset length header)))
 
