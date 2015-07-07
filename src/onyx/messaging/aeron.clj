@@ -27,10 +27,10 @@
                              (:onyx.messaging.aeron/embedded-driver? opts)
                              (:onyx.messaging.aeron/embedded-driver? defaults))]
       (if embedded-driver?
-        (let [ctx (doto (MediaDriver$Context.) 
-                    (.threadingMode ThreadingMode/DEDICATED)
-                    (.dirsDeleteOnExit true))
-              media-driver (MediaDriver/launch ctx)]
+        (let [;ctx (doto (MediaDriver$Context.) 
+              ;      (.threadingMode ThreadingMode/DEDICATED)
+               ;     (.dirsDeleteOnExit true))
+              media-driver (MediaDriver/launch #_ctx)]
           (assoc component :media-driver media-driver)) 
         component)))
 
