@@ -82,6 +82,8 @@
                                  :onyx.messaging.aeron/embedded-driver? (if (= embedded "true")
                                                                           true
                                                                           false)
+                                 :onyx.messaging/bind-addr addr
+
                                  :onyx.messaging/impl :aeron)
         peer-group (onyx.api/start-peer-group peer-config-aeron)] 
     (try 
