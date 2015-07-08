@@ -40,13 +40,12 @@
               (swap! received update-in [:retry] conj retry-id))))))
 
 
-(defn test-send-commands-aeron [addr peer-group commands]
-  (let [server-port 53001
-        send-messenger (component/start (aeron peer-group))]
+(defn test-send-commands-aeron [addr port peer-group commands]
+  (let [send-messenger (component/start (aeron peer-group))]
 
     (try 
       (let [send-link (ext/connect-to-peer send-messenger nil {:aeron/external-addr addr
-                                                               :aeron/port server-port})]
+                                                               :aeron/port port})]
           (reduce (fn [_ command] 
                     (case (:command command)
                       :messages (ext/send-messages send-messenger nil send-link (:payload command))              
@@ -61,24 +60,23 @@
             (finally 
               (component/stop send-messenger)))))
 
-(defn test-receive-commands-aeron [addr peer-group]
+(defn test-receive-commands-aeron [addr port peer-group]
     (let [received (atom {})]
       (with-redefs [aeron/handle-sent-message (handle-sent-message received)
                     aeron/handle-aux-message (handle-aux-message received)] 
-        (let [server-port 53001
-              recv-messenger (component/start (aeron peer-group))]
+        (let [recv-messenger (component/start (aeron peer-group))]
 
           (try 
             (let [_ (ext/open-peer-site recv-messenger {:onyx.messaging/bind-addr addr
-                                                        :aeron/port server-port})]
+                                                        :aeron/port port})]
               
 
-              (Thread/sleep 30000)
+              (Thread/sleep 60000)
               (println "Received! " @received))
             (finally 
               (component/stop recv-messenger)))))))
 
-(defn -main [type addr embedded]
+(defn -main [type addr port embedded]
   (let [peer-config-aeron (assoc (:peer-config config) 
                                  :onyx/id id 
                                  :onyx.messaging.aeron/embedded-driver? (if (= embedded "true")
@@ -88,6 +86,6 @@
         peer-group (onyx.api/start-peer-group peer-config-aeron)] 
     (try 
       (case type
-        "receive" (test-receive-commands-aeron addr peer-group)
-        "send" (test-send-commands-aeron addr peer-group sample-commands))    
+        "receive" (test-receive-commands-aeron addr (Integer/parseInt port) peer-group)
+        "send" (test-send-commands-aeron addr (Integer/parseInt port) peer-group sample-commands))    
       (finally (onyx.api/shutdown-peer-group peer-group)))))
