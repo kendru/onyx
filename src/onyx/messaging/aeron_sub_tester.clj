@@ -78,14 +78,14 @@
             (finally 
               (component/stop recv-messenger)))))))
 
-(def peer-config-aeron 
-  (assoc (:peer-config config) 
-         :onyx/id id 
-         :onyx.messaging.aeron/embedded-driver? false
-         :onyx.messaging/impl :aeron))
-
-(defn -main [type addr]
-  (let [peer-group (onyx.api/start-peer-group peer-config-aeron)] 
+(defn -main [type addr embedded]
+  (let [peer-config-aeron (assoc (:peer-config config) 
+                                 :onyx/id id 
+                                 :onyx.messaging.aeron/embedded-driver? (if (= embedded "true")
+                                                                          true
+                                                                          false)
+                                 :onyx.messaging/impl :aeron)
+        peer-group (onyx.api/start-peer-group peer-config-aeron)] 
     (try 
       (case type
         "receive" (test-receive-commands-aeron addr peer-group)
