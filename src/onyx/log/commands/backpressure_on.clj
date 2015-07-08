@@ -9,6 +9,7 @@
 
 (defmethod extensions/apply-log-entry :backpressure-on
   [{:keys [args]} replica]
+  (info "BACKPRESSURE WAS TURNED ON " args)
   (if (= :active (get-in replica [:peer-state (:peer args)]))
     (assoc-in replica [:peer-state (:peer args)] :backpressure)
     replica))
