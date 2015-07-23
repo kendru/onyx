@@ -3,10 +3,10 @@
 
 (defprotocol PipelineInput 
   "Input pipeline protocol. All input pipelines must implement this protocol."
-  (ack-segment [this event message-id]
+  (ack-message [this event message-id]
                "Acknowledges a message at the native level for a batch of message ids.
                Must return a map.")
-  (retry-segment [this event message-id]
+  (retry-message [this event message-id]
                  "Releases a message id from the pending message pool and retries it.")
   (pending? [this event message-id]
             "Returns true if this message ID is pending.")

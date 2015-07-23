@@ -25,7 +25,7 @@
           (timbre/fatal e)))
       (recur))))
 
-(defn ack-segment [ack-state completion-ch message-id completion-id ack-val]
+(defn ack-message [ack-state completion-ch message-id completion-id ack-val]
   (let [rets
         (swap!
           ack-state
@@ -42,10 +42,10 @@
       (>!! completion-ch
            {:id message-id :peer-id completion-id}))))
 
-(defn ack-segments-loop [ack-state acking-ch completion-ch]
+(defn ack-messages-loop [ack-state acking-ch completion-ch]
   (loop []
     (when-let [ack (<!! acking-ch)]
-      (ack-segment ack-state completion-ch
+      (ack-message ack-state completion-ch
                    (:id ack) (:completion-id ack) (:ack-val ack))
       (recur)))
   (timbre/info "Stopped Ack Messages Loop"))
@@ -60,13 +60,13 @@
           acking-buffer-size (arg-or-default :onyx.messaging/completion-buffer-size opts)
           acking-ch (chan acking-buffer-size)
           state (atom {})
-          ack-segments-fut (future (ack-segments-loop state acking-ch completion-ch))
+          ack-messages-fut (future (ack-messages-loop state acking-ch completion-ch))
           timeout-fut (future (clear-messages-loop state opts))]
       (assoc component
              :ack-state state
              :completion-ch completion-ch
              :acking-ch acking-ch
-             :ack-segments-fut ack-segments-fut
+             :ack-messages-fut ack-messages-fut
              :timeout-fut timeout-fut)))
 
   (stop [component]
@@ -74,7 +74,7 @@
     (close! (:completion-ch component))
     (close! (:acking-ch component))
     (future-cancel (:timeout-fut component)) 
-    (assoc component :ack-state nil :completion-ch nil :timeout-fut nil :ack-segments-fut nil)))
+    (assoc component :ack-state nil :completion-ch nil :timeout-fut nil :ack-messages-fut nil)))
 
 (defn acking-daemon [config]
   (map->AckingDaemon {:opts config}))

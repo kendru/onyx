@@ -73,10 +73,10 @@
 
   p-ext/PipelineInput
 
-  (ack-segment [_ _ message-id]
+  (ack-message [_ _ message-id]
     (swap! pending-messages dissoc message-id))
 
-  (retry-segment 
+  (retry-message 
     [_ _ message-id]
     (when-let [msg (get @pending-messages message-id)]
       (swap! pending-messages dissoc message-id)
